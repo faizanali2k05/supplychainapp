@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Products - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/tracking.js"></script>
+    <script src="assets/js/realtime.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="#" onclick="logout(); return false;">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <div style="display: flex; min-height: calc(100vh - 60px);">
+        <main style="flex: 1; padding: 2rem;">
+            <div class="container">
+                <h2 style="margin-bottom: 2rem;"><i class="fas fa-search" aria-hidden="true"></i> Track Product</h2>
+
+                <div class="card">
+                    <h3>Enter Product ID</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                        Search for a product using its unique ID or QR code
+                    </p>
+
+                    <form id="track-product-form">
+                        <div class="form-group">
+                            <label for="product-id">Product ID</label>
+                            <input type="text" id="product-id" placeholder="Enter or paste product ID" required>
+                        </div>
+                        <button type="submit" class="btn">Search Product</button>
+                        <div id="track-error" class="error-message"></div>
+                    </form>
+                </div>
+
+                <div id="product-details" style="display: none;">
+                    <div class="card">
+                        <h3><i class="fas fa-box" aria-hidden="true"></i> Product Information</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem;">Product Name</label>
+                                <p id="prod-name" style="font-size: 1.1rem; font-weight: 600;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem;">Batch Number</label>
+                                <p id="prod-batch" style="font-size: 1.1rem; font-weight: 600;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem;">Created Date</label>
+                                <p id="prod-date" style="font-size: 1.1rem; font-weight: 600;"></p>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-bottom: 2rem;">
+                            <img id="prod-qr" src="" alt="QR Code" style="max-width: 150px; margin: 0 auto;">
+                        </div>
+
+                        <div style="background: #f0f9ff; border: 2px solid var(--primary); border-radius: 6px; padding: 1rem; text-align: center; margin-bottom: 2rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.2rem;"></i>
+                            <p style="color: var(--primary); font-weight: 600; margin-top: 0.5rem;">Product Verified</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Supply Chain History</h3>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                            Complete movement history from manufacturer to current location
+                        </p>
+                        <ul id="product-timeline" class="timeline"></ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System using Blockchain
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="assets/js/supabase.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        async function logout() {
+            await ensureSupabaseReady();
+            await supabaseClient.auth.signOut();
+            location.href = 'login.html';
+        }
+
+        document.getElementById('track-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = document.getElementById('product-id').value.trim();
+            const errorEl = document.getElementById('track-error');
+            const detailsEl = document.getElementById('product-details');
+            
+            errorEl.textContent = '';
+            detailsEl.style.display = 'none';
+
+            try {
+                await ensureSupabaseReady();
+                
+                const { data: product, error: pErr } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
+
+                if (pErr) throw new Error('Product not found');
+                if (!product) throw new Error('No matching product');
+
+                const { data: events, error: eErr } = await supabaseClient
+                    .from('supply_chain_events')
+                    .select('*')
+                    .eq('product_id', productId)
+                    .order('timestamp', { ascending: true });
+
+                if (eErr) throw eErr;
+
+                // Display product info
+                document.getElementById('prod-name').textContent = product.name;
+                document.getElementById('prod-batch').textContent = product.batch_number;
+                document.getElementById('prod-date').textContent = new Date(product.created_at).toLocaleDateString();
+                document.getElementById('prod-qr').src = product.qr_code;
+
+                // Display timeline
+                const timeline = document.getElementById('product-timeline');
+                timeline.innerHTML = '';
+                
+                if (events && events.length > 0) {
+                    events.forEach(ev => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <div class="timeline-content">
+                                <div class="timeline-time">${new Date(ev.timestamp).toLocaleString()}</div>
+                                <div class="timeline-text">
+                                    <strong>${ev.role}</strong> updated at <strong>${ev.location}</strong>
+                                    <br>Status: <span style="color: var(--primary);">${ev.status}</span>
+                                </div>
+                            </div>
+                        `;
+                        timeline.appendChild(li);
+                    });
+                } else {
+                    timeline.innerHTML = '<li><p style="color: var(--text-light);">No movement history yet</p></li>';
+                }
+
+                detailsEl.style.display = 'block';
+                detailsEl.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = err.message || 'Failed to track product';
+            }
+        });
+    </script>
+</body>
+</html>

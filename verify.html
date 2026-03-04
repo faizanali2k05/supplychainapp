@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Product - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/verification.js"></script>
+    <script src="assets/js/realtime.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="#" onclick="logout(); return false;">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <div style="display: flex; min-height: calc(100vh - 60px);">
+        <main style="flex: 1; padding: 2rem;">
+            <div class="container">
+                <h2 style="margin-bottom: 1rem;"><i class="fas fa-shield-alt" aria-hidden="true"></i> Verify Product Authenticity</h2>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">
+                    Scan or enter a product ID to verify if the product is genuine and track its complete supply chain journey.
+                </p>
+
+                <div class="card">
+                    <h3>Enter Product Information</h3>
+
+                    <form id="verify-form">
+                        <div class="form-group">
+                            <label for="product-code"><i class="fas fa-qrcode" aria-hidden="true"></i> Product ID / QR Code</label>
+                            <input type="text" id="product-code" placeholder="Scan QR code or paste product ID" required>
+                            <small style="color: var(--text-light); display: block; margin-top: 0.5rem;">
+                                You can use a QR code scanner app to scan the product's QR code
+                            </small>
+                        </div>
+                        <button type="submit" class="btn">Verify Product</button>
+                        <div id="verify-error" class="error-message"></div>
+                    </form>
+                </div>
+
+                    <div id="verification-result" style="display: none;">
+                        <div class="card" id="status-card">
+                        <div style="text-align: center; padding: 2rem 0;">
+                            <span id="status-icon" style="font-size: 4rem;"></span>
+                            <h2 id="status-title" style="margin-top: 1rem;"></h2>
+                            <p id="status-message" style="color: var(--text-light); font-size: 1.1rem; margin-top: 0.5rem;"></p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-box" aria-hidden="true"></i> Product Details</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Product Name</label>
+                                <p id="verify-name" style="font-size: 1.2rem; font-weight: 700; margin-top: 0.5rem;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Batch Number</label>
+                                <p id="verify-batch" style="font-size: 1.2rem; font-weight: 700; margin-top: 0.5rem;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Manufactured On</label>
+                                <p id="verify-mfg-date" style="font-size: 1.2rem; font-weight: 700; margin-top: 0.5rem;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Product ID</label>
+                                <p id="verify-id" style="font-size: 1rem; font-weight: 700; margin-top: 0.5rem; word-break: break-all;"></p>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 2rem;">
+                            <img id="verify-qr" src="" alt="QR Code" style="max-width: 200px; border: 2px solid var(--border); border-radius: 6px; padding: 1rem; background: white;">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Supply Chain Journey</h3>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                            This product has passed through the following locations and handlers:
+                        </p>
+                        <ul id="verify-timeline" class="timeline"></ul>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-shield-check" aria-hidden="true"></i> Verification Report</h3>
+                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 4px solid var(--primary); padding: 1.5rem; border-radius: 6px;">
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Status:</strong> <span id="report-status" style="color: var(--success);"></span>
+                            </p>
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Total Movements:</strong> <span id="report-movements">0</span>
+                            </p>
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Last Updated:</strong> <span id="report-last-update"></span>
+                            </p>
+                            <p style="margin: 0.5rem 0;">
+                                <strong>Blockchain Status:</strong> <span style="color: var(--primary);">Verified on Blockchain</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+                <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System using Blockchain - Ensuring Product Authenticity
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="assets/js/supabase.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        async function logout() {
+            await ensureSupabaseReady();
+            await supabaseClient.auth.signOut();
+            location.href = 'login.html';
+        }
+
+        document.getElementById('verify-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productCode = document.getElementById('product-code').value.trim();
+            const errorEl = document.getElementById('verify-error');
+            const resultEl = document.getElementById('verification-result');
+
+            errorEl.textContent = '';
+            resultEl.style.display = 'none';
+
+            try {
+                await ensureSupabaseReady();
+
+                const { data: product, error: pErr } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('id', productCode)
+                    .single();
+
+                if (pErr || !product) throw new Error('Product not found in system');
+
+                const { data: events, error: eErr } = await supabaseClient
+                    .from('supply_chain_events')
+                    .select('*')
+                    .eq('product_id', productCode)
+                    .order('timestamp', { ascending: true });
+
+                if (eErr) throw eErr;
+
+                // Set status
+                const statusCard = document.getElementById('status-card');
+                const isVerified = !!product;
+                
+                if (isVerified) {
+                    statusCard.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
+                    document.getElementById('status-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+                    document.getElementById('status-title').textContent = 'Product Verified';
+                    document.getElementById('status-title').style.color = 'var(--success)';
+                    document.getElementById('status-message').textContent = 'This product is authentic and has been registered in the supply chain system.';
+                } else {
+                    statusCard.style.background = 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
+                    document.getElementById('status-icon').innerHTML = '<i class="fas fa-times-circle"></i>';
+                    document.getElementById('status-title').textContent = 'Product Not Found';
+                    document.getElementById('status-title').style.color = 'var(--danger)';
+                    document.getElementById('status-message').textContent = 'This product is not registered in our system. It may be counterfeit.';
+                }
+
+                // Display product info
+                document.getElementById('verify-name').textContent = product.name;
+                document.getElementById('verify-batch').textContent = product.batch_number;
+                document.getElementById('verify-id').textContent = product.id;
+                document.getElementById('verify-mfg-date').textContent = product.manufacturing_date ? new Date(product.manufacturing_date).toLocaleDateString() : '';
+                document.getElementById('verify-qr').src = product.qr_code;
+                // optional description field if present
+                if (product.description) {
+                    const descEl = document.createElement('p');
+                    descEl.textContent = product.description;
+                    document.getElementById('verify-qr').parentElement.insertAdjacentElement('beforebegin', descEl);
+                }
+
+                // Display timeline
+                const timeline = document.getElementById('verify-timeline');
+                timeline.innerHTML = '';
+
+                if (events && events.length > 0) {
+                    events.forEach(ev => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <div class="timeline-content">
+                                <div class="timeline-time">${new Date(ev.timestamp).toLocaleString()}</div>
+                                <div class="timeline-text">
+                                    <strong>Hash:</strong> <code>${ev.hash}</code><br>
+                                    <strong>${ev.role}</strong> at <strong>${ev.location}</strong>
+                                    <br>Status: <span style="color: var(--primary); font-weight: 600;">${ev.status}</span>
+                                </div>
+                            </div>
+                        `;
+                        timeline.appendChild(li);
+                    });
+                    document.getElementById('report-movements').textContent = events.length;
+                    document.getElementById('report-last-update').textContent = new Date(events[events.length - 1].timestamp).toLocaleString();
+                } else {
+                    timeline.innerHTML = '<li><p style="color: var(--text-light);">No movement history - product recently registered</p></li>';
+                    document.getElementById('report-movements').textContent = '0';
+                }
+
+                document.getElementById('report-status').textContent = isVerified ? 'Authentic' : 'Counterfeit';
+                resultEl.style.display = 'block';
+                resultEl.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = err.message || 'Failed to verify product';
+            }
+        });
+    </script>
+</body>
+</html>

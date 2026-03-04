@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/data.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DApp</h2>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <!-- dynamic links -->
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="topbar">
+                <button id="menu-toggle" class="menu-toggle"><i class="fas fa-bars" aria-hidden="true"></i></button>
+                <div class="topbar-right">
+                    <span id="user-role"></span>
+                    <button id="logout-btn" class="btn-sm">Logout</button>
+                </div>
+            </header>
+            <section class="dashboard" id="dashboard-section">
+                <!-- dynamic dashboard cards & modules -->
+            </section>
+        </div>
+    </div>
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ui-utils.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/tracking.js"></script>
+    <script src="assets/js/reports.js"></script>
+</body>
+</html>

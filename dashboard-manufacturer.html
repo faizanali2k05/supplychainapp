@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manufacturer Dashboard - Supply Chain Management</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-industry"></i> Manufacturer</h2>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <a href="#" id="link-dashboard" data-section="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="#" id="link-register" data-section="register"><i class="fas fa-plus-circle"></i> Register Product</a>
+                <a href="#" id="link-my-products" data-section="products"><i class="fas fa-boxes"></i> My Products</a>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="topbar">
+                <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">Menu</button>
+                <div class="topbar-right">
+                    <span id="user-role">Loading...</span>
+                    <button id="logout-btn" class="btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </header>
+            <section class="dashboard" id="dashboard-section">
+                <!-- Dynamic content -->
+            </section>
+        </div>
+    </div>
+
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ui-utils.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/realtime.js"></script>
+    <script>
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                loadManufacturerSection(section);
+            });
+        });
+
+        async function loadManufacturerSection(section) {
+            const dashboardSection = document.getElementById('dashboard-section');
+            
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'register':
+                    dashboardSection.innerHTML = '<div class="card"><h3>Register New Product</h3><div id="product-form-container">Loading...</div></div>';
+                    if (products) products.init();
+                    break;
+                case 'products':
+                    loadMyProducts();
+                    break;
+                default:
+                    loadDashboard();
+            }
+        }
+
+        async function loadDashboard() {
+            const dashboardSection = document.getElementById('dashboard-section');
+            let stats = '<div class="cards-grid">';
+            
+            try {
+                const { data: sessData } = await supabaseClient.auth.getSession();
+                const userId = sessData.session.user.id;
+                
+                const { count: productCount } = await supabaseClient
+                    .from('products')
+                    .select('*', { count: 'exact' })
+                    .eq('manufacturer_id', userId);
+                
+                const { data: blocks } = await supabaseClient
+                    .from('blockchain_blocks')
+                    .select('product_id')
+                    .eq('created_by', userId);
+                
+                stats += `
+                    <div class="stat-card">
+                        <h4><i class="fas fa-cube"></i> Products Registered</h4>
+                        <div class="number">${productCount || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background:linear-gradient(135deg, var(--secondary) 0%, #047857 100%);">
+                        <h4><i class="fas fa-link"></i> Blockchain Blocks</h4>
+                        <div class="number">${blocks?.length || 0}</div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+            }
+            
+            stats += '</div>';
+            
+            dashboardSection.innerHTML = `
+                <div class="card">
+                    <h3>Manufacturer Dashboard</h3>
+                    <p>Register products and track their blockchain journey through the supply chain</p>
+                </div>
+                ${stats}
+            `;
+        }
+
+        async function loadMyProducts() {
+            const dashboardSection = document.getElementById('dashboard-section');
+            dashboardSection.innerHTML = '<div class="card"><h3>My Products</h3><div id="my-products-container">Loading...</div></div>';
+
+            const container = document.getElementById('my-products-container');
+            try {
+                const { data: sessData } = await supabaseClient.auth.getSession();
+                const userId = sessData.session.user.id;
+
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('manufacturer_id', userId)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-light);">No products registered yet</p>';
+                    return;
+                }
+
+                let html = '<table style="width:100%;border-collapse:collapse;margin-top:1rem;"><tr style="background:var(--light-bg);"><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Product Name</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Batch Number</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Date</th></tr>';
+                
+                data.forEach(product => {
+                    const dateStr = new Date(product.created_at).toLocaleDateString();
+                    html += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.75rem;">${product.name}</td><td style="padding:0.75rem;">${product.batch_number}</td><td style="padding:0.75rem;font-size:0.9rem;">${dateStr}</td></tr>`;
+                });
+                
+                html += '</table>';
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger);">Error loading products: ${err.message}</p>`;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadManufacturerSection('dashboard');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Supply Chain Management</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-crown"></i> Admin</h2>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <a href="#" id="link-dashboard" data-section="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="#" id="link-reports" data-section="reports"><i class="fas fa-file-alt"></i> Reports</a>
+                <a href="#" id="link-users" data-section="users"><i class="fas fa-users"></i> Users</a>
+                <a href="#" id="link-hashes" data-section="hashes"><i class="fas fa-lock"></i> Verification Strings</a>
+                <a href="#" id="link-verify" data-section="verify"><i class="fas fa-check-circle"></i> Verify Product</a>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="topbar">
+                <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+                <div class="topbar-right">
+                    <span id="user-role">Loading...</span>
+                    <button id="logout-btn" class="btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </header>
+            <section class="dashboard" id="dashboard-section">
+                <!-- Dynamic content -->
+            </section>
+        </div>
+    </div>
+
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ui-utils.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/verification.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/reports.js"></script>
+    <script src="assets/js/realtime.js"></script>
+    <script>
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                loadAdminSection(section);
+            });
+        });
+
+        async function loadAdminSection(section) {
+            const dashboardSection = document.getElementById('dashboard-section');
+            
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'reports':
+                    dashboardSection.innerHTML = '<div class="card"><h3>System Reports</h3><div id="reports-container">Loading...</div></div>';
+                    if (reports) reports.init();
+                    break;
+                case 'users':
+                    dashboardSection.innerHTML = '<div class="card"><h3>User Management</h3><div id="users-container">Loading...</div></div>';
+                    loadUsers();
+                    break;
+                case 'hashes':
+                    dashboardSection.innerHTML = '<div class="card"><h3>Verification Strings</h3><div id="hashes-container">Loading...</div></div>';
+                    loadVerificationHashes();
+                    break;
+                case 'verify':
+                    dashboardSection.innerHTML = '<div class="card"><h3>Product Verification</h3><div id="verify-form-container">Loading...</div></div>';
+                    loadVerifyForm();
+                    break;
+                default:
+                    loadDashboard();
+            }
+        }
+
+        async function loadDashboard() {
+            const dashboardSection = document.getElementById('dashboard-section');
+            let stats = '<div class="cards-grid">';
+            
+            try {
+                const { count: productCount } = await supabaseClient.from('products').select('*', { count: 'exact' });
+                const { count: userCount } = await supabaseClient.from('users').select('*', { count: 'exact' });
+                const { count: blockCount } = await supabaseClient.from('blockchain_blocks').select('*', { count: 'exact' });
+                
+                stats += `
+                    <div class="stat-card">
+                        <h4><i class="fas fa-cube"></i> Total Products</h4>
+                        <div class="number">${productCount || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background:linear-gradient(135deg, var(--secondary) 0%, #047857 100%);">
+                        <h4><i class="fas fa-users"></i> Total Users</h4>
+                        <div class="number">${userCount || 0}</div>
+                    </div>
+                    <div class="stat-card" style="background:linear-gradient(135deg, #d97706 0%, #b45309 100%);">
+                        <h4><i class="fas fa-link"></i> Blockchain Blocks</h4>
+                        <div class="number">${blockCount || 0}</div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+            }
+            
+            stats += '</div>';
+            
+            dashboardSection.innerHTML = `
+                <div class="card">
+                    <h3>Admin Dashboard</h3>
+                    <p>System overview and quick statistics</p>
+                </div>
+                ${stats}
+            `;
+        }
+
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            try {
+                const { data, error } = await supabaseClient.from('users').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p>No users found</p>';
+                    return;
+                }
+
+                let html = '<table style="width:100%;border-collapse:collapse;margin-top:1rem;"><tr style="background:var(--light-bg);"><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Name</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Email</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Role</th></tr>';
+                
+                data.forEach(user => {
+                    html += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.75rem;">${user.name || 'N/A'}</td><td style="padding:0.75rem;font-size:0.9rem;">${user.email}</td><td style="padding:0.75rem;"><span style="background:var(--primary);color:white;padding:0.25rem 0.75rem;border-radius:4px;font-size:0.85rem;font-weight:600;">${user.role}</span></td></tr>`;
+                });
+                
+                html += '</table>';
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger);">Error loading users: ${err.message}</p>`;
+            }
+        }
+
+        async function loadVerificationHashes() {
+            const container = document.getElementById('hashes-container');
+            try {
+                // Fetch verification hashes
+                const { data: hashes, error: hashError } = await supabaseClient
+                    .from('product_verification_hashes')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (hashError) throw hashError;
+
+                if (!hashes || hashes.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-light);">No verification strings recorded yet</p>';
+                    return;
+                }
+
+                // Fetch all products to match with hashes
+                const { data: products } = await supabaseClient.from('products').select('id, name, batch_number');
+                const productMap = {};
+                if (products) {
+                    products.forEach(p => productMap[p.id] = p);
+                }
+
+                let html = '<table style="width:100%;border-collapse:collapse;margin-top:1rem;margin-bottom:2rem;"><tr style="background:var(--light-bg);"><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Product</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Verification String</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Hash (First 32 chars)</th><th style="padding:0.75rem;text-align:left;border-bottom:2px solid var(--border);">Created</th></tr>';
+                
+                hashes.forEach(record => {
+                    const product = productMap[record.product_id];
+                    const productName = product ? product.name : 'Unknown';
+                    const hashPreview = record.verification_hash.substring(0, 32) + '...';
+                    const createdDate = new Date(record.created_at).toLocaleString();
+                    html += `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.75rem;"><strong>${productName}</strong></td><td style="padding:0.75rem;font-size:0.9rem;word-break:break-all;"><code style="background:var(--light-bg);padding:0.25rem 0.5rem;border-radius:3px;">${record.verification_string}</code></td><td style="padding:0.75rem;font-size:0.85rem;font-family:monospace;color:var(--text-light);">${hashPreview}</td><td style="padding:0.75rem;font-size:0.9rem;">${createdDate}</td></tr>`;
+                });
+                
+                html += '</table>';
+                container.innerHTML = `<div style="overflow-x:auto;">${html}</div><p style="color:var(--text-light);font-size:0.9rem;margin-top:1rem;">Total Verification Strings: ${hashes.length}</p>`;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger);">Error loading verification strings: ${err.message}</p>`;
+            }
+        }
+
+        function loadVerifyForm() {
+            const container = document.getElementById('verify-form-container');
+            container.innerHTML = `
+                <form id="verify-form" style="max-width:600px;">
+                    <div class="form-group">
+                        <label for="verify-product-id">Product ID to Verify</label>
+                        <input type="text" id="verify-product-id" placeholder="Paste product UUID" required>
+                    </div>
+                    <button type="submit" class="btn">Verify Product</button>
+                    <div id="verify-error" class="error-message" style="margin-top:1rem;"></div>
+                </form>
+                <div id="verify-result" style="margin-top:2rem;"></div>
+            `;
+
+            document.getElementById('verify-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const productId = document.getElementById('verify-product-id').value.trim();
+                const resultDiv = document.getElementById('verify-result');
+                const errorDiv = document.getElementById('verify-error');
+                errorDiv.textContent = '';
+                resultDiv.innerHTML = '<p style="text-align:center;color:var(--text-light);">Verifying...</p>';
+
+                if (Verification) {
+                    const result = await Verification.verifyProduct(productId, supabaseClient);
+                    Verification.renderVerificationResult(resultDiv, result, 'admin');
+                }
+            });
+        }
+
+        window.addEventListener('load', () => {
+            loadAdminSection('dashboard');
+        });
+    </script>
+</body>
+</html>

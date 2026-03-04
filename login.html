@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="signup.html">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="auth-container">
+        <form id="login-form" class="auth-form">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size:2.5rem; margin-bottom:1rem;">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2>Welcome Back</h2>
+                <p style="color: var(--text-light); font-size: 0.95rem; margin-top:0.5rem;">Sign in to your supply chain account</p>
+            </div>
+
+            <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fas fa-key"></i> Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; padding: 1rem; margin-top: 1.5rem; font-size: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+
+            <div id="error-msg" class="error-message"></div>
+
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border); opacity: 0.5;">
+
+            <p style="text-align: center; color: var(--text-light); font-size: 0.95rem;">
+                Don't have an account? <a href="signup.html"><strong>Create one now</strong></a>
+            </p>
+        </form>
+    </div>
+
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ui-utils.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        function ensureFormListenersAttached() {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm && !loginForm.dataset.listenerAttached) {
+                loginForm.addEventListener('submit', handleLogin);
+                loginForm.dataset.listenerAttached = 'true';
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ensureFormListenersAttached);
+        } else {
+            ensureFormListenersAttached();
+        }
+        setTimeout(ensureFormListenersAttached, 100);
+    </script>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

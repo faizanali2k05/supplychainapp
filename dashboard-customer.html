@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Dashboard - Supply Chain Management</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-user"></i> Customer</h2>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <a href="#" id="link-dashboard" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="#" id="link-track" data-section="track"><i class="fas fa-search"></i> Track Product</a>
+                <a href="#" id="link-verify" data-section="verify"><i class="fas fa-check-circle"></i> Verify</a>
+                <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+        <div class="main-content">
+            <header class="topbar">
+                <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">Menu</button>
+                <div class="topbar-right">
+                    <span id="user-role">Loading...</span>
+                    <button id="logout-btn" class="btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </header>
+            <section class="dashboard" id="dashboard-section">
+                <!-- Dynamic content -->
+            </section>
+        </div>
+    </div>
+
+    <script src="assets/js/supabase.js"></script>
+    <script src="assets/js/ui-utils.js"></script>
+    <script src="assets/js/blockchain.js"></script>
+    <script src="assets/js/verification.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/tracking.js"></script>
+    <script src="assets/js/realtime.js"></script>
+    <script>
+        document.querySelectorAll('[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                loadCustomerSection(section);
+            });
+        });
+
+        async function loadCustomerSection(section) {
+            const dashboardSection = document.getElementById('dashboard-section');
+            
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'track':
+                    dashboardSection.innerHTML = '<div class="card"><h3>Track Your Product</h3><div id="track-form-container">Loading...</div></div>';
+                    if (tracking) tracking.initCustomer();
+                    break;
+                case 'verify':
+                    dashboardSection.innerHTML = '<div class="card"><h3>Verify Product Authenticity</h3><div id="verify-form-container">Loading...</div></div>';
+                    loadVerifyForm();
+                    break;
+                default:
+                    loadDashboard();
+            }
+        }
+
+        async function loadDashboard() {
+            const dashboardSection = document.getElementById('dashboard-section');
+            dashboardSection.innerHTML = `
+                <div class="card">
+                    <h3>Welcome to Your Dashboard</h3>
+                    <p>Track products from manufacture to delivery and verify authenticity using blockchain technology</p>
+                </div>
+                <div class="cards-grid">
+                    <div class="stat-card">
+                        <h4><i class="fas fa-cube"></i> Track Products</h4>
+                        <p style="margin:0.5rem 0;font-size:0.9rem;">Enter product ID to see supply chain journey</p>
+                    </div>
+                    <div class="stat-card" style="background:linear-gradient(135deg, var(--secondary) 0%, #047857 100%);">
+                        <h4><i class="fas fa-check-circle"></i> Verify Authentic</h4>
+                        <p style="margin:0.5rem 0;font-size:0.9rem;">Scan QR or enter ID to verify</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadVerifyForm() {
+            const container = document.getElementById('verify-form-container');
+            container.innerHTML = `
+                <form id="verify-form" style="max-width:600px;">
+                    <div class="form-group">
+                        <label for="verify-product-id">Product ID or QR Code</label>
+                        <input type="text" id="verify-product-id" placeholder="Paste product UUID" required>
+                    </div>
+                    <button type="submit" class="btn">Verify Authenticity</button>
+                    <div id="verify-error" class="error-message" style="margin-top:1rem;"></div>
+                </form>
+                <div id="verify-result" style="margin-top:2rem;"></div>
+            `;
+
+            document.getElementById('verify-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const productId = document.getElementById('verify-product-id').value.trim();
+                const resultDiv = document.getElementById('verify-result');
+                const errorDiv = document.getElementById('verify-error');
+                errorDiv.textContent = '';
+                resultDiv.innerHTML = '<p style="text-align:center;color:var(--text-light);">Verifying product...</p>';
+
+                if (Verification) {
+                    const result = await Verification.verifyProduct(productId, supabaseClient);
+                    Verification.renderVerificationResult(resultDiv, result, 'customer');
+                }
+            });
+        }
+
+        window.addEventListener('load', () => {
+            loadCustomerSection('dashboard');
+        });
+    </script>
+</body>
+</html>

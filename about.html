@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="login.html">Login</a>
+            </nav>
+        </div>
+    </header>
+    <main class="main">
+        <section class="about-section">
+            <div class="container">
+                <h2>About Our Decentralized Supply Chain Management System</h2>
+                
+                <div class="about-content">
+                    <div class="about-box">
+                        <h3>Our Mission</h3>
+                        <p>
+                            To revolutionize supply chain transparency and accountability by leveraging blockchain technology and decentralized systems. 
+                            We aim to eliminate counterfeit products, reduce fraud, and build trust among all stakeholders in the supply chain ecosystem.
+                        </p>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>What We Do</h3>
+                        <p>
+                            Our Decentralized Supply Chain Management System provides a secure, transparent, and immutable record of product movement 
+                            from manufacturer to customer. Using blockchain technology and unique product identifiers (QR codes), we ensure authenticity 
+                            and enable real-time tracking of products throughout their journey.
+                        </p>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Key Features</h3>
+                        <ul>
+                            <li><strong>User Authentication:</strong> Secure login with role-based access control</li>
+                            <li><strong>Product Registration:</strong> Manufacturers register products with unique IDs and QR codes</li>
+                            <li><strong>Real-Time Tracking:</strong> Monitor product movement at every stage</li>
+                            <li><strong>Blockchain Recording:</strong> Immutable and transparent audit trails</li>
+                            <li><strong>Product Verification:</strong> Customers verify authenticity using QR codes</li>
+                            <li><strong>Supply Chain Status Updates:</strong> Distributors and retailers update product locations and status</li>
+                            <li><strong>Report Management:</strong> Comprehensive analytics for decision-making</li>
+                            <li><strong>Decentralized Architecture:</strong> No single point of failure or control</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>User Roles</h3>
+                        <ul>
+                            <li><strong>Manufacturer:</strong> Registers new products and initiates supply chain tracking</li>
+                            <li><strong>Distributor:</strong> Updates product status and location during distribution</li>
+                            <li><strong>Retailer:</strong> Updates product information at retail points</li>
+                            <li><strong>Customer:</strong> Verifies product authenticity and views product history</li>
+                            <li><strong>Admin:</strong> Manages system operations, users, and generates reports</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Security & Trust</h3>
+                        <p>
+                            Every transaction and update is securely recorded on the blockchain, ensuring data immutability and transparency. 
+                            Our system uses industry-standard encryption protocols (HTTPS) and password hashing to protect sensitive information. 
+                            Role-based access control ensures that only authorized users can perform specific operations, maintaining system integrity.
+                        </p>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Benefits</h3>
+                        <ul>
+                            <li>Eliminates counterfeit products from the supply chain</li>
+                            <li>Reduces fraud and unauthorized modifications</li>
+                            <li>Improves supply chain visibility and efficiency</li>
+                            <li>Builds customer trust through transparency</li>
+                            <li>Enables quick identification of supply chain issues</li>
+                            <li>Provides complete audit trails for compliance</li>
+                            <li>Reduces operational delays and errors</li>
+                            <li>Supports informed decision-making through analytics</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Technology Stack</h3>
+                        <ul>
+                            <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JavaScript (ES6+)</li>
+                            <li><strong>Authentication & Database:</strong> SQL(PostgreSQL)</li>
+                            <li><strong>Blockchain Integration:</strong> Smart contract support for immutable records</li>
+                            <li><strong>QR Code Generation:</strong> Dynamic QR code generation for product tracking</li>
+                            <li><strong>Deployment:</strong> Netlify (Static hosting)</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Get Started</h3>
+                        <p>
+                            Join our decentralized supply chain network today. Create an account, select your role, and start managing products 
+                            securely and transparently. Whether you're a manufacturer, distributor, retailer, or customer, our system provides 
+                            the tools you need for supply chain excellence.
+                        </p>
+                        <a href="signup.html" class="btn">Create an Account</a>
+                        <p style="margin-top:1.5rem; font-style:italic; color:var(--text-light);">
+                            This Decentralized Supply Chain Management System using Blockchain was developed by the supply chain team.
+                        </p>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Project Team</h3>
+                        <ul>
+                            <li><strong>Muhammad Sheraz</strong> — BSF2206451</li>
+                            <li><strong>Muhammad Zubair Talib</strong> — BSF2206494</li>
+                            <li><strong>Muhammad Shan</strong> — BSF2206492</li>
+                        </ul>
+                        <p><strong>Supervisor:</strong> Mr. Ghulam Irtaza</p>
+                        <p><strong>Project ID:</strong> IT-UEM-BS-F22E17</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System using Blockchain
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

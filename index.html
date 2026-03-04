@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decentralized Supply Chain Management System - Blockchain</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="login.html">Login</a>
+                <a href="signup.html">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main class="main">
+        <section class="hero">
+            <div class="container">
+                <h2>Decentralized Supply Chain Management</h2>
+                <p>Track products from manufacturer to customer with transparency and security.</p>
+                <a class="btn" href="signup.html">Get Started</a>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

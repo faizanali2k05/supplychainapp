@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - Decentralized Supply Chain Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <i class="fas fa-link" style="font-size:1.8rem;"></i>
+            <h1>Decentralized Supply Chain Management System</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="#" onclick="logout(); return false;">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <div style="display: flex; min-height: calc(100vh - 60px);">
+        <main style="flex: 1; padding: 2rem;">
+            <div class="container">
+                <h2 style="margin-bottom: 0.5rem;">Reports & Analytics</h2>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">
+                    Comprehensive supply chain statistics and performance metrics
+                </p>
+
+                <!-- Key Metrics -->
+                <div class="cards-grid">
+                    <div class="stat-card">
+                        <h4>Total Products</h4>
+                        <div class="number" id="stat-products">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--secondary) 0%, #047857 100%);">
+                        <h4>Total Transactions</h4>
+                        <div class="number" id="stat-transactions">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--warning) 0%, #b45309 100%);">
+                        <h4>Active Users</h4>
+                        <div class="number" id="stat-users">0</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);">
+                        <h4>Pending Updates</h4>
+                        <div class="number" id="stat-pending">0</div>
+                    </div>
+                </div>
+
+                <!-- Role Distribution -->
+                <div class="card">
+                    <h3><i class="fas fa-users" aria-hidden="true"></i> User Distribution by Role</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;" id="role-stats">
+                        <!-- populated by JS -->
+                    </div>
+                    <canvas id="rolesChart" style="max-width:400px; margin-top:2rem;"></canvas>
+                </div>
+                <!-- Status Distribution Chart -->
+                <div class="card">
+                    <h3><i class="fas fa-tasks" aria-hidden="true"></i> Status Distribution</h3>
+                    <canvas id="statusChart" style="max-width:400px; margin-top:2rem;"></canvas>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="card">
+                    <h3><i class="fas fa-history" aria-hidden="true"></i> Recent Supply Chain Activities</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="background: var(--light-bg); border-bottom: 2px solid var(--border);">
+                                <tr>
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Product ID</th>
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Action</th>
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Role</th>
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Location</th>
+                                    <th style="padding: 1rem; text-align: left; font-weight: 600;">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-activities">
+                                <tr>
+                                    <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-light);">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="card">
+                    <h3><i class="fas fa-heartbeat" aria-hidden="true"></i> System Health</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                        <div style="background: var(--light-bg); padding: 1.5rem; border-radius: 6px;">
+                            <h4 style="color: var(--text-dark); margin-bottom: 0.5rem;"><i class="fas fa-check" style="color:var(--success); margin-right:0.5rem"></i>Database Status</h4>
+                            <p style="color: var(--success); font-weight: 600;">Operational</p>
+                        </div>
+                        <div style="background: var(--light-bg); padding: 1.5rem; border-radius: 6px;">
+                            <h4 style="color: var(--text-dark); margin-bottom: 0.5rem;"><i class="fas fa-check" style="color:var(--success); margin-right:0.5rem"></i>API Response</h4>
+                            <p style="color: var(--success); font-weight: 600;">Normal</p>
+                        </div>
+                        <div style="background: var(--light-bg); padding: 1.5rem; border-radius: 6px;">
+                            <h4 style="color: var(--text-dark); margin-bottom: 0.5rem;"><i class="fas fa-check" style="color:var(--success); margin-right:0.5rem"></i>Authentication</h4>
+                            <p style="color: var(--success); font-weight: 600;">Active</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="card">
+                    <h3><i class="fas fa-save" aria-hidden="true"></i> Export Reports</h3>
+                    <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                        Download detailed reports for further analysis
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <button class="btn" onclick="exportCSV()" style="width: 100%;"><i class="fas fa-file-csv" aria-hidden="true"></i> Export as CSV</button>
+                        <button class="btn btn-secondary" onclick="printReport()" style="width: 100%;"><i class="fas fa-print" aria-hidden="true"></i> Print Report</button>
+                        <button class="btn btn-secondary" onclick="refreshData()" style="width: 100%;"><i class="fas fa-sync" aria-hidden="true"></i> Refresh Data</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="year"></span> Decentralized Supply Chain Management System using Blockchain - Analytics & Reporting
+                <a href="about.html" style="color:#fff; margin-left:1rem; text-decoration:underline;">About Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="assets/js/supabase.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        async function logout() {
+            await ensureSupabaseReady();
+            await supabaseClient.auth.signOut();
+            location.href = 'login.html';
+        }
+
+        async function loadReports() {
+            try {
+                await ensureSupabaseReady();
+
+                // Get total products
+                const { count: prodCount } = await supabaseClient
+                    .from('products')
+                    .select('*', { count: 'exact' });
+
+                // Get total transactions
+                const { count: transCount } = await supabaseClient
+                    .from('supply_chain_events')
+                    .select('*', { count: 'exact' });
+
+                // Get total users
+                const { count: userCount } = supabaseClient
+                    .from('users')
+                    .select('*', { count: 'exact' });
+
+                // Get role statistics
+                const { data: roleData } = await supabaseClient
+                    .from('users')
+                    .select('role');
+
+                const roleCounts = {};
+                (roleData || []).forEach(u => {
+                    roleCounts[u.role] = (roleCounts[u.role] || 0) + 1;
+                });
+
+                // Get recent activities
+                const { data: recentEvents } = await supabaseClient
+                    .from('supply_chain_events')
+                    .select('*')
+                    .order('timestamp', { ascending: false })
+                    .limit(10);
+
+                // Update UI
+                document.getElementById('stat-products').textContent = prodCount || 0;
+                document.getElementById('stat-transactions').textContent = transCount || 0;
+                document.getElementById('stat-users').textContent = (userCount || 0);
+
+                // Display role stats
+                const roleStatsEl = document.getElementById('role-stats');
+                roleStatsEl.innerHTML = '';
+                const roles = ['admin', 'manufacturer', 'distributor', 'retailer', 'customer'];
+                const roleLabels = [];
+                const roleValues = [];
+                roles.forEach(role => {
+                    const count = roleCounts[role] || 0;
+                    roleLabels.push(role);
+                    roleValues.push(count);
+                    const div = document.createElement('div');
+                    div.style.cssText = 'background: var(--light-bg); padding: 1.5rem; border-radius: 6px; text-align: center;';
+                    div.innerHTML = `
+                        <h4 style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0.5rem; text-transform: capitalize;">${role}</h4>
+                        <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">${count}</p>
+                    `;
+                    roleStatsEl.appendChild(div);
+                });
+                // render roles chart
+                const ctxRoles = document.getElementById('rolesChart');
+                if (ctxRoles) {
+                    new Chart(ctxRoles, {
+                        type: 'pie',
+                        data: {
+                            labels: roleLabels,
+                            datasets: [{ data: roleValues, backgroundColor: ['#2563eb','#059669','#d97706','#b91c1c','#6b7280'] }]
+                        }
+                    });
+                }
+
+                // status distribution
+                const { data: allEvents } = await supabaseClient.from('supply_chain_events').select('status');
+                const statusCounts = {};
+                (allEvents || []).forEach(e => {
+                    statusCounts[e.status] = (statusCounts[e.status] || 0) + 1;
+                });
+                const statusLabels = Object.keys(statusCounts);
+                const statusValues = statusLabels.map(l => statusCounts[l]);
+                const ctxStatus = document.getElementById('statusChart');
+                if (ctxStatus) {
+                    new Chart(ctxStatus, {
+                        type: 'bar',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{ label: 'Count', data: statusValues, backgroundColor: '#2563eb' }]
+                        },
+                        options: { scales: { y: { beginAtZero: true } } }
+                    });
+                }
+
+                // Display recent activities
+                const activitiesEl = document.getElementById('recent-activities');
+                activitiesEl.innerHTML = '';
+                (recentEvents || []).forEach(event => {
+                    const row = `<tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1rem;"><code style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;">${event.product_id.substring(0, 8)}...</code></td>
+                        <td style="padding: 1rem;"><i class="fas fa-map-marker-alt" aria-hidden="true" style="margin-right:0.5rem"></i> ${event.status}</td>
+                        <td style="padding: 1rem;"><span style="background: var(--light-bg); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; text-transform: capitalize;">${event.role}</span></td>
+                        <td style="padding: 1rem;">${event.location}</td>
+                        <td style="padding: 1rem; color: var(--text-light); font-size: 0.9rem;">${new Date(event.timestamp).toLocaleString()}</td>
+                    </tr>`;
+                    activitiesEl.innerHTML += row;
+                });
+
+                if (!recentEvents || recentEvents.length === 0) {
+                    activitiesEl.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-light);">No recent activities</td></tr>';
+                }
+
+            } catch (err) {
+                console.error('Error loading reports:', err);
+            }
+        }
+
+        function exportCSV() {
+            alert('CSV export feature coming soon!');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function refreshData() {
+            loadReports();
+            alert('Data refreshed!');
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadReports);
+    </script>
+</body>
+</html>
